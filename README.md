@@ -1,10 +1,15 @@
 # planner-GLIMPSE
 
-# Contributor: goldenGlow21 / huni77 / lejuho / brayden1102
+## Contributor
 
-# Campaign Starts From: 2024.07.01
+- _goldenGlow21
+- _huni77
+- _lejuho
+- _brayden1102
 
-# Details
+## Campaign Starts From: 2024.07.01
+
+# Project Details
 
 - Framework: Flutter
 - Language: Dart
