@@ -2,10 +2,10 @@
 
 ## Contributor
 
-- _goldenGlow21
-- _huni77
-- _lejuho
-- _brayden1102
+- goldenGlow21
+- huni77
+- lejuho
+- brayden1102
 
 ## Campaign Starts From: 2024.07.01
 
