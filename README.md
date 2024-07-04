@@ -1,6 +1,6 @@
 # planner-GLIMPSE
 
-# Contributor: 이종훈 / 장지훈 / 이주호 / 김동환
+# Contributor: goldenGlow21 / huni77 / lejuho / brayden1102
 
 # Campaign Starts From: 2024.07.01
 
