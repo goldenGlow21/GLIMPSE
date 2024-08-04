@@ -1,29 +1,5 @@
-enum Status {
-  approved,
-  pending,
-  rejected,
-}
-
-int add({
-  required int a,
-  required int b,
-}) {
-  return a + b;
-}
-
-typedef Operation(int x, int y);
-
-void sum(int x, int y) {
-  print('결괏값 : ${x + y}');
-}
-
-void sub(int x, int y) {
-  print('결괏값 : ${x - y}');
-}
-
-void cal(int x, int y, oper) {
-  oper(x, y);
-}
+import 'phase_1_func.dart';
+import 'dart:async';
 
 void main() {
   //한 줄 주석
@@ -178,4 +154,200 @@ void main() {
   oper(1, 2); // 결괏값 : -1
 
   cal(3, 2, sum); // 결괏값 : 5
+
+  Lee juho = Lee('주호', 100);
+  juho.sayName();
+  juho.countMoney();
+
+  print("\n");
+
+  Kim Bob = Kim('밥', 200);
+  Bob.sayName();
+  Bob.countMoney();
+  print(Bob.private);
+
+  print("\n");
+
+  Hong Gildong = Hong("길동", 10000);
+  Gildong.sayName();
+  Gildong.countMoney();
+
+  print("\n");
+
+  Siu siu = Siu("GOAT", 1000);
+  siu.Exer();
+
+  print("\n");
+
+  tiger mask = tiger("predator", 5);
+  mask.takeShape();
+  mask.roar();
+
+  print("\n");
+
+  final cache = Cache<List<int>>(data: [1, 2, 3]);
+
+  print(cache.data.reduce((value, element) => value + element));
+
+  print("\n");
+
+  Counter count1 = Counter();
+  Counter count2 = Counter();
+  Counter count3 = Counter();
+
+  print("\n");
+
+  Siu GOAT = Siu('또 당신입니까', 1) // 케스케이드 연산자
+    ..sayName()
+    ..countMoney();
+
+  Future<String> name_another; // 미래에 받을 String값
+  Future<int> number; // " int값
+  Future<bool> isOpened; // " bool값
+
+  addNumbers(1, 1);
+// 결과
+// 1+1 계산 시작!
+// 1+1 코드 실행 끝
+// 1+1 = 2
+
+//************************************************** */
+
+  addNumbers2(1, 1);
+  addNumbers2(2, 2);
+// 결과
+// 1+1 계산시작!
+// 2+2 계산시작!
+// 1+1 = 2
+// 1+1 코드 실행 끝
+// 2+2 = 4
+// 2+2 코드 실행 끝
+
+  final controller = StreamController();
+  final stream = controller.stream.asBroadcastStream();
+
+  final streamListener1 = stream.listen((val) {
+    print('listening 1');
+    print(val);
+  });
+
+  final streamListener2 = stream.listen((val) {
+    print('listening 2');
+    print(val);
+  });
+
+  controller.sink.add(1);
+  controller.sink.add(2);
+  controller.sink.add(3);
+// 출력
+// listening 1
+// 1
+// listening 2
+// 1
+// listening 1
+// 2
+// listening 2
+// 2
+// listening 1
+// 3
+// listening 2
+// 3
+
+  playStream();
+  // 출력
+  // i=0
+  // i=1
+  // i=2
+  // i=3
+  // i=4
+
+  (String, int) minji = ('민지', 20);
+  (String, int, bool) haerin = ('해린', 20, true);
+
+  print(minji); // ('민지',20);
+  print(haerin.$1); // 해린
+
+  ({String name, int age}) minji2 = (name: '민지', age: 20);
+
+// 리스트에서의 구조분해
+// 3줄을 1줄로 줄일 수 있다
+// final newJeans = ['민지','해린'];
+// final minji = newJeans[0];
+// final haerin = newJeans[1];
+  final [minji_a, haerin_a] = ['민지', '해린'];
+
+  print(minji_a); // 민지
+
+//-------------------------------
+// 리스트에서 구조분해 (스프레드연산자 "..." 사용)
+  final numbers_a = [1, 2, 3, 4, 5, 6, 7, 8];
+
+  final [x, y, ..., z] = numbers;
+
+  print(x); // 1
+  print(y); // 2
+  print(z); // 8
+
+//------------------------------
+// 맵에서 구조분해
+  final minjiMap = {'name': '민지', 'age': 20};
+
+  final {'name': name_b, 'age': age} = minjiMap; // name과 age라는 변수를 선언 후 각각 초기화
+
+  print('name:$name_b'); // 민지
+  print('age:$age'); // 20
+
+//------------------------------
+// 클래스에서 구조분해
+
+  final minji_3 = Idol(name: '민지', age: 20);
+
+  final Idol(name: name_c, age: age_a) = minji_3;
+
+  print(name_c); // 민지
+  print(age_a); // 20
+
+  String dayKor = '월요일';
+
+  String dayEnglish = switch (dayKor) {
+    '월요일' => 'Monday',
+    '화요일' => 'Tuesday',
+    '수요일' => 'Wednesday',
+    '목요일' => 'Thursday',
+    '금요일' => 'Friday',
+    '토요일' => 'Saturday',
+    '일요일' => 'Sunday',
+    _ => 'Not Found',
+  };
+
+  print(dayEnglish); // Monday
+
+  switcher('aaa'); // match: aaa
+  switcher([1, 2]); // match: [1,2]
+  switcher([3, 4, 5]); // match: [_,_,_]
+  switcher([6, 7]); // match: [int 6,int 7]
+  switcher(('민지', 19)); // match: (String 민지, int 19)
+  switcher(8); // no match
+
+  bool? val;
+
+  switch (val) {
+    // null 조건이 없어서 non exhaustive switch statement 에러 발생
+    case true:
+      print('true');
+    case false:
+      print('false');
+  }
+  ;
+
+  (int a, int b) val2 = (1, -1);
+
+  switch (val2) {
+    // 출력: default
+    case (1, _) when val2.$2 > 0:
+      print('1,_');
+      break;
+    default:
+      print('default');
+  }
 }
