@@ -1,4 +1,4 @@
-import 'screen/home_screen_1.dart';
+import 'screen/blog_web_app_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
