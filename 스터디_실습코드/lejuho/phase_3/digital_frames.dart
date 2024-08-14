@@ -1,5 +1,5 @@
 
-import '../phase_3/screen/home_screen_2.dart';
+import 'screen/digital_frames_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
