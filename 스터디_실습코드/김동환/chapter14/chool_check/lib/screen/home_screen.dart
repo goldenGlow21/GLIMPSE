@@ -3,7 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 class HomeScreen extends StatelessWidget {
-  static final LatLng companyLatLng = LatLng(  // ➊ 지도 초기화 위치
+  static final LatLng companyLatLng = LatLng(  // 1. 지도 초기화 위치
     37.5233273,  // 위도
     126.921252,  // 경도
   );
@@ -29,7 +29,7 @@ class HomeScreen extends StatelessWidget {
       body: FutureBuilder<String>(
           future: checkPermission(),
           builder: (context, snapshot) {
-            // ❶ 로딩 상태
+            // 1. 로딩 상태
             if (!snapshot.hasData &&
                 snapshot.connectionState == ConnectionState.waiting) {
               return Center(
@@ -37,7 +37,7 @@ class HomeScreen extends StatelessWidget {
               );
             }
 
-            // ➋ 권한 허가된 상태
+            // 2. 권한 허가된 상태
             if(snapshot.data == '위치 권한이 허가 되었습니다.'){
 
               // 기존 Column 위젯 관련 코드
@@ -117,7 +117,7 @@ class HomeScreen extends StatelessWidget {
               );
             }
 
-            // ➌ 권한 없는 상태
+            // 3. 권한 없는 상태
             return Center(
               child: Text(
                 snapshot.data.toString(),
