@@ -1,15 +1,18 @@
-import '../../const/calendar_scheduler/colors.dart';
+import '../../const/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final String label;
   final bool isTime;   // 시간 선택하는 텍스트 필드인지 여부
+  final FormFieldSetter<String> onSaved;
+  final FormFieldValidator<String> validator;
 
   const CustomTextField({
     required this.label,
     required this.isTime,
-
+    required this.onSaved,
+    required this.validator,
     Key? key,
   }) : super(key: key);
 
@@ -28,6 +31,8 @@ class CustomTextField extends StatelessWidget {
         Expanded(
           flex: isTime ? 0 : 1, // ➏
           child: TextFormField(
+            onSaved: onSaved,  // ➊ 폼 저장했을 때 실행할 함수
+            validator: validator,
             cursorColor: Colors.grey,    // 커서 색상 변경
             maxLines: isTime ? 1 : null, // ➊ 시간 관련 텍스트 필드가 아니면 한 줄이상 작성 가능
             expands: !isTime, // ➋ 시간 관련 텍스트 필드는 공간 최대 차지
