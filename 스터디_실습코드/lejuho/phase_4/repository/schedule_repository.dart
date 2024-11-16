@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:calendar_scheduler/model/schedule_model.dart';
+import '../model/schedule_model.dart';
 import 'package:dio/dio.dart';
 
 class ScheduleRepository {
