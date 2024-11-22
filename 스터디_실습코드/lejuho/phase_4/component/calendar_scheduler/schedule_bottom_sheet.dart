@@ -4,6 +4,8 @@ import '../../const/calendar_scheduler/colors.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:get_it/get_it.dart';
 
+import '../../database/drift_database.dart';
+
 class ScheduleBottomSheet extends StatefulWidget {
   final DateTime selectedDate;
 
@@ -104,19 +106,25 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
     );
   }
 
-  void onSavePressed(BuildContext context) async {    if (formKey.currentState!.validate()) {
+  void onSavePressed(BuildContext context) async {    
+    if (formKey.currentState!.validate()) {
       // ➊ 폼 검증하기
       formKey.currentState!.save(); // ➋ 폼 저장하기
 
-      context.read<ScheduleProvider>().createSchedule(
-        schedule: ScheduleModel(
-          id: 'new_model',  // ➊ 임시 ID
-          content: content!,
-          date: widget.selectedDate,
-          startTime: startTime!,
-          endTime: endTime!,
-        ),
-      );
+      final schedule = ScheduleModel(
+        id: Uuid().v4(),
+        content: content!,
+        date: widget.selectedDate,
+        startTime: startTime!,
+        endTime: endTime!,
+      )
+
+      await FirebaseFirestore.instance
+        .collection(
+          'schedule',
+        )
+        .doc(schedule.id)
+        .set(schedule.toJson());
 
       Navigator.of(context).pop();
     }
