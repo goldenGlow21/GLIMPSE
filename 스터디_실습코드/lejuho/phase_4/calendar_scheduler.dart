@@ -8,27 +8,27 @@ import './provider/schedule_provider.dart';
 import './repository/schedule_repository.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:calendar_scheduler/firebase_options.dart';
+import './repository/auth_repository.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
   await initializeDateFormatting();
 
-  final database = LocalDatabase(); // ➊ 데이터베이스 생성
-
-  final repository = ScheduleRepository();
-  final scheduleProvider = ScheduleProvider(repository: repository);
-
-  GetIt.I.registerSingleton<LocalDatabase>(database); // ➋ GetIt에
+  final scheduleRepository = ScheduleRepository();
+  final authRepository = AuthRepository();
+  final scheduleProvider = ScheduleProvider(
+    scheduleRepository: scheduleRepository,
+    authRepository: authRepository,
+  );
 
   runApp(
-    MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomeScreen(),
+    ChangeNotifierProvider(
+      create: (_) => scheduleProvider,
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        home: AuthScreen(),
+      ),
     ),
   );
 }
