@@ -1,32 +1,110 @@
 import '../model/schedule_model.dart';
+import '../repository/auth_repository.dart';
 import '../repository/schedule_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 class ScheduleProvider extends ChangeNotifier {
-  final ScheduleRepository repository;  // ➊ API 요청 로직을 담은 클래스
+  final ScheduleRepository scheduleRepository;
+  final AuthRepository authRepository;
 
-  DateTime selectedDate = DateTime.utc(  // ➋ 선택한 날짜
+  String? accessToken;
+  String? refreshToken;
+
+  DateTime selectedDate = DateTime.utc(
     DateTime.now().year,
     DateTime.now().month,
     DateTime.now().day,
   );
-  Map<DateTime, List<ScheduleModel>> cache = {};  // ➌ 일정 정보를 저장해둘 변수
+  Map<DateTime, List<ScheduleModel>> cache = {};
 
   ScheduleProvider({
-    required this.repository,
-  }) : super() {
-    getSchedules(date: selectedDate);
+    required this.scheduleRepository,
+    required this.authRepository,
+  }) : super() {}
+
+  updateTokens({
+    String? refreshToken,
+    String? accessToken,
+  }) {
+    if (refreshToken != null) {
+      this.refreshToken = refreshToken;
+    }
+
+    if (accessToken != null) {
+      this.accessToken = accessToken;
+    }
+
+    notifyListeners();
+  }
+
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
+    final resp = await authRepository.login(
+      email: email,
+      password: password,
+    );
+
+    updateTokens(
+      refreshToken: resp.refreshToken,
+      accessToken: resp.accessToken,
+    );
+  }
+
+  logout(){
+    accessToken = null;
+    refreshToken = null;
+    cache = {};
+    notifyListeners();
+  }
+
+  Future<void> register({
+    required String email,
+    required String password,
+  }) async {
+    final resp = await authRepository.register(
+      email: email,
+      password: password,
+    );
+
+    updateTokens(
+      refreshToken: resp.refreshToken,
+      accessToken: resp.accessToken,
+    );
+  }
+
+  rotateToken({
+    required String refreshToken,
+    required bool isRefreshToken,
+  }) async {
+    if (isRefreshToken) {
+      final token = await authRepository.rotateRefreshToken(refreshToken: refreshToken);
+
+      this.refreshToken = token;
+    } else {
+      final token = await authRepository.rotateAccessToken(refreshToken: refreshToken);
+
+      accessToken = token;
+    }
+
+    notifyListeners();
   }
 
   void getSchedules({
     required DateTime date,
   }) async {
-    final resp = await repository.getSchedules(date: date);  // GET 메서드 보내기
+    final resp = await scheduleRepository.getSchedules(
+      date: date,
+      accessToken: accessToken!,
+    );
 
-    cache.update(date, (value) => resp, ifAbsent: () => resp);  // ➊ 선택한 날짜의 일정들 업데이트하기
+    print(resp);
 
-    notifyListeners();  // ➋ Listening 하는 위젯들 업데이트하기
+    cache.update(date, (value) => resp, ifAbsent: () => resp);
+
+    notifyListeners();
   }
 
   void createSchedule({
@@ -35,45 +113,50 @@ class ScheduleProvider extends ChangeNotifier {
     final targetDate = schedule.date;
     final uuid = Uuid();
 
-    final tempId = uuid.v4();  // 유일무이한 ID값을 생성합니다.
+    final tempId = uuid.v4();
     final newSchedule = schedule.copyWith(
-      id: tempId,  // 임시 ID를 지정합니다.
+      id: tempId,
     );
 
-    cache.update(  // 긍정적 응답 구간입니다. 서버에서 응답을 받기전에 캐시를 먼저 업데이트합니다.
+    cache.update(
       targetDate,
-          (value) => [
+      (value) => [
         ...value,
         newSchedule,
       ]..sort(
-            (a, b) => a.startTime.compareTo(
-          b.startTime,
+          (a, b) => a.startTime.compareTo(
+            b.startTime,
+          ),
         ),
-      ),
       ifAbsent: () => [newSchedule],
     );
 
-    notifyListeners();  // 캐시업데이트 반영하기
+    notifyListeners();
 
     try {
-      final savedSchedule = await repository.createSchedule(schedule: schedule);  // API 요청을 합니다.
+      final savedSchedule = await scheduleRepository.createSchedule(
+        schedule: schedule,
+        accessToken: accessToken!,
+      );
 
-      cache.update(  // ➊ 서버 응답 기반으로 캐시 업데이트
+      cache.update(
         targetDate,
-            (value) => value
+        (value) => value
             .map((e) => e.id == tempId
-            ? e.copyWith(
-          id: savedSchedule,
-        )
-            : e)
+                ? e.copyWith(
+                    id: savedSchedule,
+                  )
+                : e)
             .toList(),
       );
     } catch (e) {
-      cache.update(  // ➋ 삭제 실패시 캐시 롤백하기
+      cache.update(
         targetDate,
-            (value) => value.where((e) => e.id != tempId).toList(),
+        (value) => value.where((e) => e.id != tempId).toList(),
       );
     }
+
+    notifyListeners();
   }
 
   void deleteSchedule({
@@ -81,28 +164,30 @@ class ScheduleProvider extends ChangeNotifier {
     required String id,
   }) async {
     final targetSchedule = cache[date]!.firstWhere(
-          (e) => e.id == id,
-    );  // 삭제할 일정 기억
+      (e) => e.id == id,
+    );
 
     cache.update(
       date,
-          (value) => value.where((e) => e.id != id).toList(),
+      (value) => value.where((e) => e.id != id).toList(),
       ifAbsent: () => [],
-    ); // 긍정적 응답 (응답 전에 캐시 먼저 업데이트)
+    );
 
-    notifyListeners();  // 캐시업데이트 반영하기
+    notifyListeners();
 
     try {
-      await repository.deleteSchedule(id: id); // ➊ 삭제함수 실행
+      await scheduleRepository.deleteSchedule(
+        id: id,
+        accessToken: accessToken!,
+      );
     } catch (e) {
       cache.update(
-        // ➋ 삭제 실패시 캐시 롤백하기
         date,
-            (value) => [...value, targetSchedule]..sort(
-              (a, b) => a.startTime.compareTo(
-            b.startTime,
+        (value) => [...value, targetSchedule]..sort(
+            (a, b) => a.startTime.compareTo(
+              b.startTime,
+            ),
           ),
-        ),
       );
     }
 
@@ -112,7 +197,8 @@ class ScheduleProvider extends ChangeNotifier {
   void changeSelectedDate({
     required DateTime date,
   }) {
-    selectedDate = date;  // 현재 선택된 날짜를 매개변수로 입력받은 날짜로 변경
+    selectedDate = date;
     notifyListeners();
   }
+
 }
