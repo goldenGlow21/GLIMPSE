@@ -15,8 +15,6 @@ class TodayBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<ScheduleProvider>();
-
     final textStyle = TextStyle(  // 기본으로 사용할 글꼴
       fontWeight: FontWeight.w600,
       color: Colors.white,
@@ -29,30 +27,34 @@ class TodayBanner extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            Expanded(
+              child: Text(
+                '${selectedDate.year}년 ${selectedDate.month}월 ${selectedDate.day}일',
+                style: textStyle,
+              ),
+            ),
             Text(
-              '${selectedDate.year}년 ${selectedDate.month}월 ${selectedDate.day}일',  // “년 월 일” 형태로 표시
+              '$count개',
               style: textStyle,
             ),
-            Row(
-              children: [
-                Text(
-                  '$count개',  // 일정 개수 표시
-                  style: textStyle,
-                ),
-                const SizedBox(width: 8.0,),
-                GestureDetector(
-                  onTap: (){
-                    provider.logout();
+            const SizedBox(width: 8.0),
+            GestureDetector(
+              onTap: () async {
 
-                    Navigator.of(context).pop();
-                  },
-                  child: Icon(
-                    Icons.logout,
-                    color: Colors.white,
-                    size: 16.0,
-                  ),
-                ),
-              ],
+
+                await GoogleSignIn().signOut();
+                // Firebase Auth 로그아웃 함수
+                await FirebaseAuth.instance.signOut();
+
+
+                // 홈 스크린으로 돌아가기
+                Navigator.of(context).pop();
+              },
+              child: Icon(
+                Icons.logout,
+                size: 16.0,
+                color: Colors.white,
+              ),
             ),
           ],
         ),
